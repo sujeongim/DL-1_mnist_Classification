@@ -39,9 +39,10 @@ def main(config):
     optimizer = optim.Adam(model.parameters())
     crit = nn.NLLLoss()
 
-    trainer = Trainer(model, optimizer, crit)
-    trainer.train(train_loader, valid_loader, config)
+    trainer = Trainer(config)
+    trainer.train(model, crit, optimizer, train_loader, valid_loader)
 
 if __name__ == '__main__':
     config = define_argparser()
     main(config)
+
