@@ -1,5 +1,5 @@
 from copy import deepcopy
-from copy import deepcopy
+
 import numpy as np
 
 import torch
@@ -26,13 +26,12 @@ class Trainer():
         return x, y
 
 
-    def _train(self, x, y, config):
+    def _train(self, train_data, config):
         self.model.train()
 
-        x, y = self._batchify(x, y, config.batch_size)
         total_loss = 0
-
-        for i, (x_i, y_i) in enumerate(zip(x,y)):
+        i = 0
+        for x_i, y_i in train_data:
             y_hat_i = self.model(x_i)
             loss_i = self.crit(y_hat_i, y_i.squeeze())
 
@@ -43,40 +42,42 @@ class Trainer():
             self.optimizer.step()
 
             if config.verbose >= 2:
-                print("Train Iteration(%d/%d): loss=%.4e" % (i+1, len(x), float(loss_i)))
-
+                print("Train Iteration(%d/%d): loss=%.4e" % (i+1, len(train_data), float(loss_i)))
+            
+            i+=1
             # Don't forget to detach to prevent memory leak.
             total_loss += float(loss_i)
 
-        return total_loss/len(x)
+        return total_loss/len(train_data)
 
-    def _validate(self, x, y, config):
+    def _validate(self, valid_data, config):
         # Turn evaluation mode on.
         self.model.eval()
 
         # Turn on the no_grad mode to make more efficiently.
         with torch.no_grad():
-            x, y = self._batchify(x, y, config.batch_size, random_split=False)
             total_loss = 0
-
-            for i, (x_i, y_i) in enumerate(zip(x, y)):
+            i = 0
+            for x_i, y_i in valid_data:
                 y_hat_i = self.model(x_i)
                 loss_i = self.crit(y_hat_i, y_i.squeeze())
 
                 if config.verbose >=2:
-                    print('Valid Iteration(%d/%d) : loss=%.4e' % (i+1, len(x), float(loss_i)))
-
+                    print('Valid Iteration(%d/%d) : loss=%.4e' % (i+1, len(valid_data), float(loss_i)))
+                i += 1
                 total_loss += float(loss_i)
 
-        return total_loss/len(x)
+        return total_loss/len(valid_data)
 
     def train(self, train_data, valid_data, config):
         lowest_loss = np.inf
         best_model = None
 
+        
         for epoch_index in range(config.n_epochs):
-            train_loss = self._train(train_data[0], train_data[1], config)
-            valid_loss = self._validate(valid_data[0], valid_data[1], config)
+
+            train_loss = self._train(train_data, config)
+            valid_loss = self._validate(valid_data, config)
 
             # You must use deep copy to take a snapshot of current best weights.
             if valid_loss < lowest_loss:
