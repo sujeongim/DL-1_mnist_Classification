@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from ../mnist_classification/fc_model import ImageClassifier
-from ../mnist_classification/trainer import Trainer
-from ../mnist_classification/data_loader import get_loaders
+from mnist_classification.models.fc_model import ImageClassifier
+from mnist_classification.trainer import Trainer
+from mnist_classification.data_loader import get_loaders
 
 def define_argparser():
     p = argparse.ArgumentParser()
@@ -40,7 +40,7 @@ def main(config):
     crit = nn.NLLLoss()
 
     trainer = Trainer(model, optimizer, crit)
-    trainer.train((x[0], y[0]), (x[1], y[1]), config)
+    trainer.train(train_loader, valid_loader, config)
 
 if __name__ == '__main__':
     config = define_argparser()
