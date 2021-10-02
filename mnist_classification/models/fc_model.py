@@ -37,7 +37,7 @@ class Block(nn.Module):
 
 # classification이라면 다른 task도 할 수 있음(하드 코딩 부분을 없앴기 때문)
 
-class ImageClassifier(nn.Module):
+class FullyConnectedClassifier(nn.Module):
 
     def __init__(self, 
                 input_size,  # 784 = 28^2 for mnist
