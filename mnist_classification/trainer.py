@@ -61,6 +61,14 @@ class MyEngine(Engine):
         p_norm = float(get_parameter_norm(engine.model.parameters()))
         g_norm = float(get_grad_norm(engine.model.parameters()))
 
+        # code for graident clipping.
+        if engine.config.max_grad > 0:
+            torch_utils.clip_grad_norm_(
+                engine.model.parameters(),
+                engine.config.max_grad,
+                norm_type=2,
+            )
+
         # Take a step of gradient descent.
         engine.optimizer.step()
 
